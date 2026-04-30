@@ -1,14 +1,28 @@
 #include <iostream>
 #include <queue>
+#include <stack>
+#include <vector>
 #include <string>
 #include <limits>
-using namespace std;
+using namespace std;   
 
 // ---------------- DATA STRUCTURES ----------------
 queue<string> regularQueue;
 queue<string> vipQueue;
 
+// Booking structure for undo
+struct Booking {
+    int movieIndex;
+    int seat;
+};
 
+stack<Booking> bookingHistory;
+
+// ---------------- MOVIES + SEATS ----------------
+vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
+vector<vector<bool>> seats(3, vector<bool>(10, false));
+
+// ---------------- INPUT HELPERS ----------------
 int readInt() {
     int val;
     while (!(cin >> val)) {
@@ -27,10 +41,73 @@ string readString() {
     return s;
 }
 
-// ---------------- MAIN ----------------
+// ---------------- VIEW SEATS ----------------
+void viewSeats(int m) {
+    cout << "\nSeats for " << movies[m] << ":\n";
+    for (int i = 0; i < 10; i++) {
+        cout << "Seat " << i + 1 << ": "
+             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
+    }
+}
+
+// ---------------- BOOK TICKET ----------------
+void bookTicket() {
+    cout << "\n--- Movies ---\n";
+    for (int i = 0; i < movies.size(); i++) {
+        cout << i + 1 << ". " << movies[i] << "\n";
+    }
+
+    cout << "Select movie (1-3): ";
+    int m = readInt();
+
+    if (m < 1 || m > 3) {
+        cout << "Invalid movie.\n";
+        return;
+    }
+
+    m--; // adjust index
+    viewSeats(m);
+
+    cout << "Enter seat number (1-10): ";
+    int seat = readInt();
+
+    if (seat < 1 || seat > 10) {
+        cout << "Invalid seat.\n";
+        return;
+    }
+
+    if (seats[m][seat - 1]) {
+        cout << "Seat already booked.\n";
+        return;
+    }
+
+    // Book it
+    seats[m][seat - 1] = true;
+    bookingHistory.push({m, seat});
+
+    cout << "Booking successful! Seat " << seat << " reserved.\n";
+}
+
+// ---------------- UNDO ----------------
+void undoBooking() {
+    if (bookingHistory.empty()) {
+        cout << "Nothing to undo.\n";
+        return;
+    }
+
+    Booking last = bookingHistory.top();
+    bookingHistory.pop();
+
+    seats[last.movieIndex][last.seat - 1] = false;
+
+    cout << "Undo successful: Seat " << last.seat
+         << " for " << movies[last.movieIndex] << " is now available.\n";
+}
+
+//----------------- MAIN FUNCTION ----------------
 int main() {
     cout << "============================================\n";
-    cout << "     Welcome to CineBook Ticketing System  \n";
+    cout << "     Welcome to CineMate Ticketing System  \n";
     cout << "============================================\n";
 
     string name, type;
@@ -41,12 +118,11 @@ int main() {
     cout << "Customer type (VIP / Regular): ";
     type = readString();
 
-    // Normalize
     for (char& c : type) c = toupper(c);
 
     if (type == "VIP") {
         vipQueue.push(name);
-        cout << "Welcome, VIP customer " << name << "! You enjoy a 10% seat discount.\n";
+        cout << "Welcome, VIP customer " << name << "!\n";
     } else {
         type = "Regular";
         regularQueue.push(name);
@@ -58,7 +134,7 @@ int main() {
     do {
         cout << "\n========== MAIN MENU ==========\n";
         cout << "1. View Movies & Prices\n";
-        cout << "2. View My Available Seats\n";
+        cout << "2. View Available Seats\n";
         cout << "3. Book Ticket\n";
         cout << "4. Undo Last Booking\n";
         cout << "5. View Sorted Booked Seats\n";
@@ -72,13 +148,16 @@ int main() {
         switch (choice) {
             case 1: cout << "[Feature coming soon]\n"; break;
             case 2: cout << "[Feature coming soon]\n"; break;
-            case 3: cout << "[Feature coming soon]\n"; break;
-            case 4: cout << "[Feature coming soon]\n"; break;
+            case 3: bookTicket(); break;   
+            case 4: undoBooking(); break; 
             case 5: cout << "[Feature coming soon]\n"; break;
             case 6: cout << "[Feature coming soon]\n"; break;
             case 7: cout << "[Feature coming soon]\n"; break;
-            case 8: cout << "\nThank you for using CineBook! Goodbye, " << name << "!\n"; break;
-            default: cout << "Invalid choice. Please enter 1-8.\n";
+            case 8:
+                cout << "\nThank you for using CineMate! Goodbye, " << name << "!\n";
+                break;
+            default:
+                cout << "Invalid choice. Please enter 1-8.\n";
         }
 
     } while (choice != 8);
