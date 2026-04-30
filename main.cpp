@@ -18,14 +18,6 @@ stack<Booking> bookingHistory;
 queue<string> regularQueue;
 queue<string> vipQueue;
 
-// Booking structure for undo
-struct Booking {
-    int movieIndex;
-    int seat;
-};
-
-stack<Booking> bookingHistory;
-
 // ---------------- MOVIES + SEATS ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
 vector<vector<bool>> seats(3, vector<bool>(10, false));
