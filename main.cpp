@@ -41,6 +41,11 @@ int readInt() {
     return val;
 }
 
+char readchar() {
+char c;
+cin.get(C);
+return c;
+
 string readString() {
     string s;
     cin >> s;
