@@ -71,6 +71,18 @@ int pay = readInt();
 
 if (pay < 1 || pay < 2) {
 cout << "Invalid payment method. Booking cancelled. "
+    return;
+}
+cout << "Processing payment";
+for(int i=0; i<3; i++) {
+cout << "."; 
+cout.flush(); }
+cout << "\n";
+
+// ---------------- CONFIRM ---------------
+cout << "Confirm booking? (Y/N): ";
+
+
 
 // ---------------- BOOK TICKET ----------------
 void bookTicket() {
