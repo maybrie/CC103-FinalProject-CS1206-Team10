@@ -10,10 +10,11 @@ using namespace std;
 struct Booking {
 int movieIndex;
 int seat;
-int ticketID
+int ticketID;
 };
 
 // ---------------- DATA STRUCTURES ----------------
+stack<Booking> bookingHistory;
 queue<string> regularQueue;
 queue<string> vipQueue;
 
