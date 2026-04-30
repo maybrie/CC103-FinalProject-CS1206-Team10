@@ -18,17 +18,16 @@ stack<Booking> bookingHistory;
 queue<string> regularQueue;
 queue<string> vipQueue;
 
-// Booking structure for undo
-struct Booking {
-    int movieIndex;
-    int seat;
-};
-
-stack<Booking> bookingHistory;
-
 // ---------------- MOVIES + SEATS ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
+vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"}
+vector<int> moviePrices = {500, 450, 400}
+
+// Seats per movie (3 movies, 10 seats each)
 vector<vector<bool>> seats(3, vector<bool>(10, false));
+
+//----------------- TICKET ID ----------------
+int ticketID = 1000;
 
 // ---------------- INPUT HELPERS ----------------
 int readInt() {
@@ -41,6 +40,11 @@ int readInt() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     return val;
 }
+
+char readchar() {
+char c;
+cin.get(C);
+return c;
 
 string readString() {
     string s;
