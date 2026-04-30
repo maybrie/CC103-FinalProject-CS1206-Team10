@@ -3,6 +3,8 @@
 #include <stack>
 #include <vector>
 #include <string>
+#include <fstream>
+#include <algorithm>
 #include <limits>
 using namespace std;  
 
@@ -17,7 +19,6 @@ int ticketID;
 stack<Booking> bookingHistory;
 queue<string> regularQueue;
 queue<string> vipQueue;
-
 // ---------------- MOVIES + SEATS ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
 vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"}
@@ -52,6 +53,63 @@ string readString() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     return s;
 }
+
+// ---------------- DECLARATIONS ----------------
+void viewVipSeats(int m);
+void viewRegularSeats(int m);
+
+// ---------------- VIEW SEATS ----------------
+void viewSeats(int m) {
+    cout << "\nSeats for " << movies[m] << " (" << times[m] << ")\n";
+    for (int i = 0; i < 10; i++) {
+        cout << "  Seat " << i + 1 << ": "
+             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
+    }
+}
+
+void viewVipSeats(int m) {
+    cout << "\nVIP Seats (1-3) for " << movies[m] << ":\n";
+    for (int i = 0; i < 3; i++) {
+        cout << "  Seat " << i + 1 << ": "
+             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
+    }
+}
+
+void viewRegularSeats(int m) {
+    cout << "\nRegular Seats (4-10) for " << movies[m] << ":\n";
+    for (int i = 3; i < 10; i++) {
+        cout << "  Seat " << i + 1 << ": "
+             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
+    }
+}
+
+void viewSeatsByType(int m, const string& type) {
+    if (type == "VIP")
+        viewVipSeats(m);
+    else
+        viewRegularSeats(m);
+}
+
+void viewAvailable(int m) {
+    cout << "\nAvailable Seats:\n";
+    for (int i = 0; i < 10; i++) {
+        if (!seats[m][i])
+            cout << "  Seat " << i + 1 << "\n";
+    }
+}
+
+void viewBooked(int m) {
+    cout << "\nBooked Seats:\n";
+    bool any = false;
+    for (int i = 0; i < 10; i++) {
+        if (seats[m][i]) {
+            cout << "  Seat " << i + 1 << "\n";
+            any = true;
+        }
+    }
+    if (!any) cout << "  None.\n";
+}
+
 
 // ---------------- VIEW SEATS ----------------
 void viewSeats(int m) {
