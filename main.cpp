@@ -20,7 +20,14 @@ queue<string> vipQueue;
 
 // ---------------- MOVIES + SEATS ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
+vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"}
+vector<int> moviePrices = {500, 450, 400}
+
+// Seats per movie (3 movies, 10 seats each)
 vector<vector<bool>> seats(3, vector<bool>(10, false));
+
+//----------------- TICKET ID ----------------
+int ticketID = 1000;
 
 // ---------------- INPUT HELPERS ----------------
 int readInt() {
