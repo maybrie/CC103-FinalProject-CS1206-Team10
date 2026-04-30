@@ -4,7 +4,14 @@
 #include <vector>
 #include <string>
 #include <limits>
-using namespace std;   
+using namespace std;  
+
+// --------------- STRUCT ---------------
+struct Booking {
+int movieIndex;
+int seat;
+int ticketID
+};
 
 // ---------------- DATA STRUCTURES ----------------
 queue<string> regularQueue;
