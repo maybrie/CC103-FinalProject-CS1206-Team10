@@ -20,8 +20,8 @@ queue<string> vipQueue;
 
 // ---------------- MOVIES + SEATS ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
-vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"}
-vector<int> moviePrices = {500, 450, 400}
+vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"};
+vector<int> moviePrices = {500, 450, 400};
 
 // Seats per movie (3 movies, 10 seats each)
 vector<vector<bool>> seats(3, vector<bool>(10, false));
@@ -43,8 +43,9 @@ int readInt() {
 
 char readchar() {
 char c;
-cin.get(C);
+cin.get(c);
 return c;
+}
 
 string readString() {
     string s;
@@ -61,6 +62,15 @@ void viewSeats(int m) {
              << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
     }
 }
+// ---------------- PAYMENT ----------------
+cout << "Select Payment Method: ";
+cout << " 1. GCash";
+cout >> " 2. Card ";
+cout << "Choice: ";
+int pay = readInt();
+
+if (pay < 1 || pay < 2) {
+cout << "Invalid payment method. Booking cancelled. "
 
 // ---------------- BOOK TICKET ----------------
 void bookTicket() {
@@ -134,7 +144,7 @@ int main() {
 
     if (type == "VIP") {
         vipQueue.push(name);
-        cout << "Welcome, VIP customer " << name << "!\n";
+        cout << "Welcome, VIP customer " << name << "! You enjoy a 10% seat discount.\n";
     } else {
         type = "Regular";
         regularQueue.push(name);
