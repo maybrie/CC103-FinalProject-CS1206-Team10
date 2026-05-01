@@ -191,14 +191,14 @@ void viewSeats(int m) {
     }
 }
 // ---------------- PAYMENT ----------------
-cout << "Select Payment Method: ";
-cout << " 1. GCash";
-cout >> " 2. Card ";
+cout << "S\nelect Payment Method:\n";
+cout << " 1. GCash\n";
+cout << " 2. Card\n";
 cout << "Choice: ";
 int pay = readInt();
 
-if (pay < 1 || pay < 2) {
-    cout << "Invalid payment method. Booking cancelled. "
+if (pay < 1 || pay > 2) {
+    cout << "Invalid payment method. Booking cancelled.\n"
     return;
 }
 cout << "Processing payment";
@@ -207,11 +207,11 @@ cout << ".";
 cout.flush(); }
 cout << "\n";
 
-if (pay == 1) cout << "Payment method: GCash\n;
+if (pay == 1) cout << "Payment method: GCash\n";
     else cout << "Payment method: Card\n"
 
 // ---------------- CONFIRM ---------------
-cout << "Confirm booking? (Y/N): ";
+cout << "\nConfirm booking? (Y/N): ";
 char confirm = readChar();
     if (confirm != 'Y' && confirm != 'y') {
     cout << "Booking cancelled.\n";
