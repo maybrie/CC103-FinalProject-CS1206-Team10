@@ -191,7 +191,7 @@ void viewSeats(int m) {
     }
 }
 // ---------------- PAYMENT ----------------
-cout << "S\nelect Payment Method:\n";
+cout << "S\Select Payment Method:\n";
 cout << " 1. GCash\n";
 cout << " 2. Card\n";
 cout << "Choice: ";
