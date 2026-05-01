@@ -198,7 +198,7 @@ cout << "Choice: ";
 int pay = readInt();
 
 if (pay < 1 || pay < 2) {
-cout << "Invalid payment method. Booking cancelled. "
+    cout << "Invalid payment method. Booking cancelled. "
     return;
 }
 cout << "Processing payment";
@@ -207,10 +207,16 @@ cout << ".";
 cout.flush(); }
 cout << "\n";
 
+if (pay == 1) cout << "Payment method: GCash\n;
+    else cout << "Payment method: Card\n"
+
 // ---------------- CONFIRM ---------------
 cout << "Confirm booking? (Y/N): ";
-
-
+char confirm = readChar();
+    if (confirm != 'Y' && confirm != 'y') {
+    cout << "Booking cancelled.\n";
+    return;
+}
 
 // ---------------- BOOK TICKET ----------------
 void bookTicket() {
