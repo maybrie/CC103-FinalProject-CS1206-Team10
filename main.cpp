@@ -3,6 +3,8 @@
 #include <stack>
 #include <vector>
 #include <string>
+#include <fstream>
+#include <algorithm>
 #include <limits>
 using namespace std;  
 
@@ -17,7 +19,6 @@ int ticketID;
 stack<Booking> bookingHistory;
 queue<string> regularQueue;
 queue<string> vipQueue;
-
 // ---------------- MOVIES + SEATS ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
 vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"};
@@ -53,6 +54,133 @@ string readString() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     return s;
 }
+
+// ---------------- DECLARATIONS ----------------
+void viewVipSeats(int m);
+void viewRegularSeats(int m);
+
+// ---------------- VIEW SEATS ----------------
+void viewSeats(int m) {
+    cout << "\nSeats for " << movies[m] << " (" << times[m] << ")\n";
+    for (int i = 0; i < 10; i++) {
+        cout << "  Seat " << i + 1 << ": "
+             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
+    }
+}
+
+void viewVipSeats(int m) {
+    cout << "\nVIP Seats (1-3) for " << movies[m] << ":\n";
+    for (int i = 0; i < 3; i++) {
+        cout << "  Seat " << i + 1 << ": "
+             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
+    }
+}
+
+void viewRegularSeats(int m) {
+    cout << "\nRegular Seats (4-10) for " << movies[m] << ":\n";
+    for (int i = 3; i < 10; i++) {
+        cout << "  Seat " << i + 1 << ": "
+             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
+    }
+}
+
+void viewSeatsByType(int m, const string& type) {
+    if (type == "VIP")
+        viewVipSeats(m);
+    else
+        viewRegularSeats(m);
+}
+
+void viewAvailable(int m) {
+    cout << "\nAvailable Seats:\n";
+    for (int i = 0; i < 10; i++) {
+        if (!seats[m][i])
+            cout << "  Seat " << i + 1 << "\n";
+    }
+}
+
+void viewBooked(int m) {
+    cout << "\nBooked Seats:\n";
+    bool any = false;
+    for (int i = 0; i < 10; i++) {
+        if (seats[m][i]) {
+            cout << "  Seat " << i + 1 << "\n";
+            any = true;
+        }
+    }
+    if (!any) cout << "  None.\n";
+}
+
+// ---------------- SORT ----------------
+void sortBooked(int m) {
+    vector<int> booked;
+    for (int i = 0; i < 10; i++) {
+        if (seats[m][i])
+            booked.push_back(i + 1);
+    }
+
+    if (booked.empty()) {
+        cout << "No booked seats for " << movies[m] << " yet.\n";
+        return;
+    }
+
+    sort(booked.begin(), booked.end());
+
+    cout << "Sorted booked seats for " << movies[m] << ": ";
+    for (int s : booked) cout << s << " ";
+    cout << "\n";
+}
+
+// ---------------- BOOK SEATS (RECURSIVE) ----------------
+void bookSeats(int count, int m, const string& type) {
+    if (count == 0) return;
+
+    viewSeatsByType(m, type);
+
+    int seat;
+    cout << "\nEnter seat number to book: ";
+    seat = readInt();
+
+    if (seat < 1 || seat > 10) {
+        cout << "Invalid seat number. Must be 1-10.\n";
+        bookSeats(count, m, type);
+        return;
+    }
+
+    if (type == "VIP" && seat > 3) {
+        cout << "VIP customers can only book seats 1-3.\n";
+        bookSeats(count, m, type);
+        return;
+    }
+
+    if (type == "Regular" && seat <= 3) {
+        cout << "Seats 1-3 are reserved for VIP customers.\n";
+        bookSeats(count, m, type);
+        return;
+    }
+
+    if (seats[m][seat - 1]) {
+        cout << "Seat " << seat << " is already booked. Please choose another.\n";
+        bookSeats(count, m, type);
+        return;
+    }
+
+    // ---------------- PRICING ----------------
+    int basePrice = moviePrices[m];
+    double finalPrice = basePrice;
+    if (type == "VIP")
+        finalPrice = basePrice * 0.90; // 10% VIP discount
+
+    cout << "\n========== BOOKING SUMMARY ==========\n";
+    cout << "  Movie      : " << movies[m] << "\n";
+    cout << "  Showtime   : " << times[m]  << "\n";
+    cout << "  Seat       : " << seat      << "\n";
+    cout << "  Type       : " << type      << "\n";
+    cout << "  Base Price : PHP " << basePrice << "\n";
+    if (type == "VIP")
+        cout << "  VIP Disc.  : 10%\n";
+    cout << "  Final Price: PHP " << finalPrice << "\n";
+    cout << "=====================================\n";
 
 // ---------------- VIEW SEATS ----------------
 void viewSeats(int m) {
