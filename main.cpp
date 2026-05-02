@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <deque>
 #include <stack>
 #include <vector>
 #include <string>
@@ -10,16 +11,22 @@ using namespace std;
 
 // --------------- STRUCT ---------------
 struct Booking {
-int movieIndex;
-int seat;
-int ticketID;
+    int movieIndex;
+    int seat;
+    int ticketID;
 };
 
 // ---------------- DATA STRUCTURES ----------------
 stack<Booking> bookingHistory;
-queue<string> regularQueue;
-queue<string> vipQueue;
-// ---------------- MOVIES + SEATS ----------------
+struct User {
+    string name;
+    bool vip;
+    int seq;
+};
+
+deque<User> userQueue;
+int userSeq = 0;
+// ---------------- MOVIES ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
 vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"};
 vector<int> moviePrices = {500, 450, 400};
@@ -58,8 +65,9 @@ string readString() {
 // ---------------- DECLARATIONS ----------------
 void viewVipSeats(int m);
 void viewRegularSeats(int m);
+void addUserPrompt();
 
-// ---------------- VIEW SEATS ----------------
+// ---------------- VIEW SEATS FUNCTIONS ----------------
 void viewSeats(int m) {
     cout << "\nSeats for " << movies[m] << " (" << times[m] << ")\n";
     for (int i = 0; i < 10; i++) {
