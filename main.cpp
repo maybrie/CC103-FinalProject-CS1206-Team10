@@ -256,6 +256,20 @@ void bookTicket() {
     cout << "Booking successful! Seat " << seat << " reserved.\n";
 }
 
+// ---------------- RECEIPT ----------------
+    cout << "\n========== TICKET RECEIPT ==========\n";
+    cout << "  Ticket ID  : " << ticketID    << "\n";
+    cout << "  Movie      : " << movies[m]   << "\n";
+    cout << "  Showtime   : " << times[m]    << "\n";
+    cout << "  Seat       : " << seat        << "\n";
+    cout << "  Type       : " << type        << "\n";
+    cout << "  Amount Paid: PHP " << finalPrice << "\n";
+    cout << "=====================================\n";
+    cout << "Booking successful!\n";
+
+    bookSeats(count - 1, m, type);
+}
+
 // ---------------- UNDO ----------------
 void undoBooking() {
     if (bookingHistory.empty()) {
@@ -266,10 +280,49 @@ void undoBooking() {
     Booking last = bookingHistory.top();
     bookingHistory.pop();
 
+    // Release the seat
     seats[last.movieIndex][last.seat - 1] = false;
 
+   ifstream fin("bookings.txt");
+    if (!fin) {
+        cout << "Undo successful but could not update records.\n";
+        return;
+    }
+
+    string line;
+    string targetID = "Ticket ID  : " + to_string(last.ticketID);
+    bool patched = false;
+
+    vector<string> lines;
+    while (getline(fin, line)) lines.push_back(line);
+    fin.close();
+
+
+    int patchLine = -1;
+    for (int i = (int)lines.size() - 1; i >= 0; i--) {
+        if (lines[i] == targetID) { patchLine = i; break; }
+    }
+
+    if (patchLine != -1) {
+       
+        for (int i = patchLine; i < (int)lines.size(); i++) {
+            if (lines[i].find("Status     :") != string::npos) {
+                lines[i] = "Status     : CANCELLED";
+                patched = true;
+                break;
+            }
+            if (lines[i].find("------") != string::npos) break; 
+        }
+    }
+
+    ofstream fout("bookings.txt");
+    for (const string& l : lines) fout << l << "\n";
+    fout.close();
+
     cout << "Undo successful: Seat " << last.seat
-         << " for " << movies[last.movieIndex] << " is now available.\n";
+         << " for " << movies[last.movieIndex] << " has been released.\n";
+    if (patched)
+        cout << "Ticket #" << last.ticketID << " marked as CANCELLED in the dashboard.\n";
 }
 
 //----------------- MAIN FUNCTION ----------------
