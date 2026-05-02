@@ -21,8 +21,8 @@ queue<string> regularQueue;
 queue<string> vipQueue;
 // ---------------- MOVIES + SEATS ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
-vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"}
-vector<int> moviePrices = {500, 450, 400}
+vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"};
+vector<int> moviePrices = {500, 450, 400};
 
 // Seats per movie (3 movies, 10 seats each)
 vector<vector<bool>> seats(3, vector<bool>(10, false));
@@ -44,8 +44,9 @@ int readInt() {
 
 char readchar() {
 char c;
-cin.get(C);
+cin.get(c);
 return c;
+}
 
 string readString() {
     string s;
@@ -189,6 +190,33 @@ void viewSeats(int m) {
              << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
     }
 }
+// ---------------- PAYMENT ----------------
+cout << "S\Select Payment Method:\n";
+cout << " 1. GCash\n";
+cout << " 2. Card\n";
+cout << "Choice: ";
+int pay = readInt();
+
+if (pay < 1 || pay > 2) {
+    cout << "Invalid payment method. Booking cancelled.\n"
+    return;
+}
+cout << "Processing payment";
+for(int i=0; i<3; i++) {
+cout << "."; 
+cout.flush(); }
+cout << "\n";
+
+if (pay == 1) cout << "Payment method: GCash\n";
+    else cout << "Payment method: Card\n"
+
+// ---------------- CONFIRM ---------------
+cout << "\nConfirm booking? (Y/N): ";
+char confirm = readChar();
+    if (confirm != 'Y' && confirm != 'y') {
+    cout << "Booking cancelled.\n";
+    return;
+}
 
 // ---------------- BOOK TICKET ----------------
 void bookTicket() {
@@ -262,7 +290,7 @@ int main() {
 
     if (type == "VIP") {
         vipQueue.push(name);
-        cout << "Welcome, VIP customer " << name << "!\n";
+        cout << "Welcome, VIP customer " << name << "! You enjoy a 10% seat discount.\n";
     } else {
         type = "Regular";
         regularQueue.push(name);
