@@ -132,7 +132,7 @@ void sortBooked(int m) {
 }
 
 // ---------------- BOOK SEATS (RECURSIVE) ----------------
-void bookSeats(int count, int m, const string& type) {
+void bookSeats(int count, int m, const string& type, const string& customerName) {
     if (count == 0) return;
 
     viewSeatsByType(m, type);
@@ -143,25 +143,25 @@ void bookSeats(int count, int m, const string& type) {
 
     if (seat < 1 || seat > 10) {
         cout << "Invalid seat number. Must be 1-10.\n";
-        bookSeats(count, m, type);
+        bookSeats(count, m, type, customerName);
         return;
     }
 
     if (type == "VIP" && seat > 3) {
         cout << "VIP customers can only book seats 1-3.\n";
-        bookSeats(count, m, type);
+        bookSeats(count, m, type, customerName);
         return;
     }
 
     if (type == "Regular" && seat <= 3) {
         cout << "Seats 1-3 are reserved for VIP customers.\n";
-        bookSeats(count, m, type);
+        bookSeats(count, m, type, customerName);
         return;
     }
 
     if (seats[m][seat - 1]) {
         cout << "Seat " << seat << " is already booked. Please choose another.\n";
-        bookSeats(count, m, type);
+        bookSeats(count, m, type, customerName);
         return;
     }
 
@@ -172,6 +172,7 @@ void bookSeats(int count, int m, const string& type) {
         finalPrice = basePrice * 0.90; // 10% VIP discount
 
     cout << "\n========== BOOKING SUMMARY ==========\n";
+    cout << " Customer    : " << customerName << "\n";
     cout << "  Movie      : " << movies[m] << "\n";
     cout << "  Showtime   : " << times[m]  << "\n";
     cout << "  Seat       : " << seat      << "\n";
@@ -221,6 +222,7 @@ char confirm = readChar();
 // ---------------- RECEIPT ----------------
     cout << "\n========== TICKET RECEIPT ==========\n";
     cout << "  Ticket ID  : " << ticketID    << "\n";
+    cout << "  Customer   : " << customerName << "\n";
     cout << "  Movie      : " << movies[m]   << "\n";
     cout << "  Showtime   : " << times[m]    << "\n";
     cout << "  Seat       : " << seat        << "\n";
@@ -229,7 +231,7 @@ char confirm = readChar();
     cout << "=====================================\n";
     cout << "Booking successful!\n";
 
-    bookSeats(count - 1, m, type);
+    bookSeats(count - 1, m, type, customerName);
 }
 
 // ---------------- UNDO ----------------
