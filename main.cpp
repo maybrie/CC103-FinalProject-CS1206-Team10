@@ -217,45 +217,7 @@ char confirm = readChar();
     cout << "Booking cancelled.\n";
     return;
 }
-
-// ---------------- BOOK TICKET ----------------
-void bookTicket() {
-    cout << "\n--- Movies ---\n";
-    for (int i = 0; i < movies.size(); i++) {
-        cout << i + 1 << ". " << movies[i] << "\n";
-    }
-
-    cout << "Select movie (1-3): ";
-    int m = readInt();
-
-    if (m < 1 || m > 3) {
-        cout << "Invalid movie.\n";
-        return;
-    }
-
-    m--; // adjust index
-    viewSeats(m);
-
-    cout << "Enter seat number (1-10): ";
-    int seat = readInt();
-
-    if (seat < 1 || seat > 10) {
-        cout << "Invalid seat.\n";
-        return;
-    }
-
-    if (seats[m][seat - 1]) {
-        cout << "Seat already booked.\n";
-        return;
-    }
-
-    // Book it
-    seats[m][seat - 1] = true;
-    bookingHistory.push({m, seat});
-
-    cout << "Booking successful! Seat " << seat << " reserved.\n";
-}
-
+    
 // ---------------- RECEIPT ----------------
     cout << "\n========== TICKET RECEIPT ==========\n";
     cout << "  Ticket ID  : " << ticketID    << "\n";
