@@ -33,7 +33,9 @@ Movie Ticket Booking System
 - 🎟️ Ticket Booking
 - 🔄 Undo Last Booking
 - 📢 Booking Confirmation
+- 🗓️ Sorted Booking Seats
 - ⭐ VIP Priority Queue
+- 🛂 Admin Dashboard
 
 ## 🖥️ Example Output
 ![image alt](https://github.com/maybrie/CC103-FinalProject-CS1206-Team10/blob/dc78e31b99f168e151229b421b9ba4610408f326/Cinemate-output.png)
