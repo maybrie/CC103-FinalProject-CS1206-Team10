@@ -289,7 +289,7 @@ void undoBooking() {
         cout << "Ticket #" << last.ticketID << " marked as CANCELLED in the dashboard.\n";
 }
 
-//----------------- MAIN FUNCTION ----------------
+//----------------- MAIN ----------------
 int main() {
     cout << "============================================\n";
     cout << "     Welcome to CineMate Ticketing System  \n";
@@ -306,11 +306,13 @@ int main() {
     for (char& c : type) c = toupper(c);
 
     if (type == "VIP") {
-        vipQueue.push(name);
+       userSeq++;
+        userQueue.push_back({name, true, userSeq});
         cout << "Welcome, VIP customer " << name << "! You enjoy a 10% seat discount.\n";
     } else {
         type = "Regular";
-        regularQueue.push(name);
+        userSeq++;
+        userQueue.push_back({name, false, userSeq});
         cout << "Welcome, " << name << "!\n";
     }
 
@@ -323,9 +325,10 @@ int main() {
         cout << "3. Book Ticket\n";
         cout << "4. Undo Last Booking\n";
         cout << "5. View Sorted Booked Seats\n";
-        cout << "6. Serve Next User\n";
-        cout << "7. Admin Dashboard\n";
-        cout << "8. Exit\n";
+        cout << "6. Add User to Queue\n";
+        cout << "7. Serve Next User\n";
+        cout << "8. Admin Dashboard\n";
+        cout << "9. Exit\n";
         cout << "================================\n";
         cout << "Choice: ";
         choice = readInt();
@@ -379,14 +382,35 @@ int main() {
                         if (!seats[m - 1][i]) available++;
         
                     if (n > available) {
-                        cout << "Only " << available << " seat(s) available for " << type << " customers.\n";
+                        if (type == "VIP") {
+                            int regAvailable = 0;
+                            for (int i = 3; i < 10; ++i)
+                                if (!seats[m - 1][i]) regAvailable++;
+        
+                            cout << "Only " << available << " VIP seat(s) available.\n";
+        
+                            if (regAvailable >= n) {
+                                cout << "VIP seats insufficient, but " << regAvailable << " regular seat(s) are available.\n";
+                                cout << "Options:\n  1. Book regular seats instead\n  2. Cancel\nChoice: ";
+                                int opt = readInt();
+                                if (opt == 1) {
+                                    bookSeats(n, m - 1, "Regular", name);
+                                } else {
+                                    cout << "Booking cancelled.\n";
+                                }
+                            } else {
+                                cout << "VIP seats are full and not enough regular seats available. Booking cancelled.\n";
+                            }
+                        } else {
+                            cout << "Only " << available << " seat(s) available for " << type << " customers.\n";
+                        }
                         break;
                     }
         
                     bookSeats(n, m - 1, type, name);
-                        
-                break;   
+                    break;
             }
+            
             case 4: undoBooking(); 
                 break; 
             case 5: cout << "\n--- Movies Now Showing ---\n"; 
@@ -411,9 +435,9 @@ int main() {
     
             default:
                 cout << "Invalid choice. Please enter 1-8.\n";
-        }
+            }
 
-    } while (choice != 8);
-
-    return 0;
-}
+        } while (choice != 8);
+    
+        return 0;
+    }
