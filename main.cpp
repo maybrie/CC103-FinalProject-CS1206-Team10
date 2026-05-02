@@ -191,14 +191,6 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
     cout << "  Final Price: PHP " << finalPrice << "\n";
     cout << "=====================================\n";
 
-// ---------------- VIEW SEATS ----------------
-void viewSeats(int m) {
-    cout << "\nSeats for " << movies[m] << ":\n";
-    for (int i = 0; i < 10; i++) {
-        cout << "Seat " << i + 1 << ": "
-             << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
-    }
-}
     // ---------------- PAYMENT ----------------
     cout << "S\Select Payment Method:\n";
     cout << " 1. GCash\n";
