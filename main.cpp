@@ -191,34 +191,34 @@ void viewSeats(int m) {
              << (seats[m][i] ? "[BOOKED]" : "[AVAILABLE]") << "\n";
     }
 }
-// ---------------- PAYMENT ----------------
-cout << "S\Select Payment Method:\n";
-cout << " 1. GCash\n";
-cout << " 2. Card\n";
-cout << "Choice: ";
-int pay = readInt();
-
-if (pay < 1 || pay > 2) {
-    cout << "Invalid payment method. Booking cancelled.\n"
-    return;
-}
-cout << "Processing payment";
-for(int i=0; i<3; i++) {
-cout << "."; 
-cout.flush(); }
-cout << "\n";
-
-if (pay == 1) cout << "Payment method: GCash\n";
-    else cout << "Payment method: Card\n"
-
-// ---------------- CONFIRM ---------------
-cout << "\nConfirm booking? (Y/N): ";
-char confirm = readChar();
-    if (confirm != 'Y' && confirm != 'y') {
-    cout << "Booking cancelled.\n";
-    return;
-}
+    // ---------------- PAYMENT ----------------
+    cout << "S\Select Payment Method:\n";
+    cout << " 1. GCash\n";
+    cout << " 2. Card\n";
+    cout << "Choice: ";
+    int pay = readInt();
     
+    if (pay < 1 || pay > 2) {
+        cout << "Invalid payment method. Booking cancelled.\n"
+        return;
+    }
+    cout << "Processing payment";
+    for(int i=0; i<3; i++) {
+    cout << "."; 
+    cout.flush(); }
+    cout << "\n";
+    
+    if (pay == 1) cout << "Payment method: GCash\n";
+        else cout << "Payment method: Card\n"
+    
+    // ---------------- CONFIRM ---------------
+    cout << "\nConfirm booking? (Y/N): ";
+    char confirm = readChar();
+        if (confirm != 'Y' && confirm != 'y') {
+        cout << "Booking cancelled.\n";
+        return;
+    }
+        
 // ---------------- RECEIPT ----------------
     cout << "\n========== TICKET RECEIPT ==========\n";
     cout << "  Ticket ID  : " << ticketID    << "\n";
@@ -331,16 +331,84 @@ int main() {
         choice = readInt();
 
         switch (choice) {
-            case 1: cout << "[Feature coming soon]\n"; break;
-            case 2: cout << "[Feature coming soon]\n"; break;
-            case 3: bookTicket(); break;   
-            case 4: undoBooking(); break; 
-            case 5: cout << "[Feature coming soon]\n"; break;
-            case 6: cout << "[Feature coming soon]\n"; break;
-            case 7: cout << "[Feature coming soon]\n"; break;
+            case 1: 
+                    cout << "\n--- Movies Now Showing ---\n"; 
+                    for (int i = 0; i < (int)movies.size(); i++) {
+                        cout << "  " << i + 1 << ". " << movies[i]
+                             << " | " << times[i]
+                             << " | PHP " << moviePrices[i];
+                        if (type == "VIP")
+                            cout << " (You pay: PHP " << moviePrices[i] * 0.90 << " with 10% VIP discount)";
+                        cout << "\n";
+            }
+                    break;
+            
+            case 2: {
+                    cout << "\n--- Movies Now Showing ---\n"; 
+                    for (int i = 0; i < (int)movies.size(); i++)
+                        cout << "  " << i + 1 << ". " << movies[i]
+                             << " (" << times[i] << ")"
+                             << " - PHP " << moviePrices[i] << "\n";
+                    cout << "Select movie (1-3): ";
+                    int m = readInt();
+                    if (m < 1 || m > 3) { cout << "Invalid selection.\n"; break; }
+                    viewSeatsByType(m - 1, type);     
+                    break;
+            }
+        
+            case 3: {
+                    cout << "\n--- Movies Now Showing ---\n";
+                    for (int i = 0; i < (int)movies.size(); i++) {
+                        cout << "  " << i + 1 << ". " << movies[i]
+                             << " (" << times[i] << ")"
+                             << " - PHP " << moviePrices[i] << "\n";
+                    }
+                    cout << "Select movie (1-3): ";
+                    int m = readInt();
+                    if (m < 1 || m > 3) { cout << "Invalid selection.\n"; break; }
+        
+                    cout << "How many seats to book? ";
+                    int n = readInt();
+                    if (n < 1) { cout << "Invalid number.\n"; break; }
+        
+                    // Check enough seats available for this type
+                    int available = 0;
+                    int start = (type == "VIP") ? 0 : 3;
+                    int end   = (type == "VIP") ? 3 : 10;
+                    for (int i = start; i < end; i++)
+                        if (!seats[m - 1][i]) available++;
+        
+                    if (n > available) {
+                        cout << "Only " << available << " seat(s) available for " << type << " customers.\n";
+                        break;
+                    }
+        
+                    bookSeats(n, m - 1, type, name);
+                        
+                break;   
+            }
+            case 4: undoBooking(); 
+                break; 
+            case 5: cout << "\n--- Movies Now Showing ---\n"; 
+                    for (int i = 0; i < (int)movies.size(); i++)
+                        cout << "  " << i + 1 << ". " << movies[i] << "\n";
+                    cout << "Select movie (1-3): ";
+                    int m = readInt();
+                    if (m < 1 || m > 3) { cout << "Invalid selection.\n"; break; }
+                    sortBooked(m - 1);
+                break;
+            }
+        
+            case 6: serveUser(); 
+                break;
+    
+            case 7: adminDashboard(); 
+                break;
+    
             case 8:
                 cout << "\nThank you for using CineMate! Goodbye, " << name << "!\n";
                 break;
+    
             default:
                 cout << "Invalid choice. Please enter 1-8.\n";
         }
