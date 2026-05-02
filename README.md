@@ -13,7 +13,10 @@ Movie Ticket Booking System
    
 ### 🏃‍♂️ How to Run
 1. g++ main.cpp 
-2. movie_booking
+
+### 🏗️ Project File Structure
+FinalProjectDSA/
+
 
 ## ✨ Features
 - 🎥 Movie Listing
