@@ -218,6 +218,39 @@ char confirm = readChar();
     return;
 }
 
+// ---------------- SAVE ----------------
+ticketID++; 
+
+seats[m][seat - 1] = true;
+bookingHistory.push({m, seat, ticketID});
+
+ofstream file("booking.txt", ios::app);
+file << "TicketID   : " << ticketID << "\n";
+file << "Customer   : " << customerName << "\n";
+file << "Movie      : " << movies[m] << "\n";
+file << "Showtime   : " << times[m] << "\n";
+file << "Seat       : " << seat << "\n";
+file << "Type       : " << type << "\n";
+file << "Final Price: PHP " << finalPrice << "\n";
+file << "Status     : CONFIRMED\n";
+file << "-------------------------------------\n";
+file.close();
+
+// ---------------- RECIEPT ----------------
+cout << "\n========== TICKET RECEIPT ==========\n";
+cout << "  Ticket ID  : " << ticketID      << "\n";
+cout << "  Customer   : " << customerName  << "\n";
+cout << "  Movie      : " << movies[m]     << "\n";
+cout << "  Showtime   : " << times[m]      << "\n";
+cout << "  Seat       : " << seat          << "\n";
+cout << "  Type       : " << type          << "\n";
+cout << "  Amount Paid: PHP " << finalPrice << "\n";
+cout << "========================================\n";
+cout << "Booking Succesful!\n";
+
+bookeSeats(count - 1, m, type, customerName);
+}
+
 // ---------------- BOOK TICKET ----------------
 void bookTicket() {
     cout << "\n--- Movies ---\n";
