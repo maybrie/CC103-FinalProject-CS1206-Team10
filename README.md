@@ -15,6 +15,15 @@ Movie Ticket Booking System
 1. g++ main.cpp 
 
 ### 🏗️ Project File Structure
+```
+│── src/
+│   └── main.cpp
+│
+│── data/
+│   └── bookings.txt
+│
+│── README.md
+```
 
 
 ## ✨ Features
