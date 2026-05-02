@@ -15,7 +15,6 @@ Movie Ticket Booking System
 1. g++ main.cpp 
 
 ### 🏗️ Project File Structure
-FinalProjectDSA/
 
 
 ## ✨ Features
