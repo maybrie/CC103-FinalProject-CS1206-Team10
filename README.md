@@ -16,6 +16,7 @@ Movie Ticket Booking System
 
 ### 🏗️ Project File Structure
 ```
+FinalProjectDSA/
 │── src/
 │   └── main.cpp
 │
@@ -31,10 +32,11 @@ Movie Ticket Booking System
 - ⏰ Showtime Selection
 - 💺 Seat Availability Checking
 - 🎟️ Ticket Booking
+- ⏳ Add User To Queue
+- 🚀 Serve Next User
 - 🔄 Undo Last Booking
 - 📢 Booking Confirmation
 - 🗓️ Sorted Booking Seats
-- ⭐ VIP Priority Queue
 - 🛂 Admin Dashboard
 
 ## 🖥️ Example Output
