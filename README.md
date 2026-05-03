@@ -35,7 +35,6 @@ FinalProjectDSA/
 - ⏳ Add User To Queue
 - 🚀 Serve Next User
 - 🔄 Undo Last Booking
-- 📢 Booking Confirmation
 - 🗓️ Sorted Booking Seats
 - 🛂 Admin Dashboard
 
