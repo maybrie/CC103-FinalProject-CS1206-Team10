@@ -8,11 +8,11 @@ Movie Ticket Booking System
  It helps reduce long queues by providing a fast and organized booking process while ensuring that seats are not double-booked.
 
 ## 🤖 Project Structure + How to Run the Program
-### Requirements
+### 📝 Requirements
 - C++ compiler (e.g., g++)
    
 ### 🏃‍♂️ How to Run
-1. g++ main.cpp 
+- main.cpp 
 
 ### 🏗️ Project File Structure
 ```
@@ -40,7 +40,7 @@ FinalProjectDSA/
 - 🛂 Admin Dashboard
 
 ## 🖥️ Example Output
-![image alt](https://github.com/maybrie/CC103-FinalProject-CS1206-Team10/blob/dc78e31b99f168e151229b421b9ba4610408f326/Cinemate-output.png)
+![image alt](https://github.com/maybrie/CC103-FinalProject-CS1206-Team10/blob/e1bd7e95b93d3a9416877e6adccad613aac06ab4/Cinemate-output.png.png)
 
 ## 👥 Contributors
 
