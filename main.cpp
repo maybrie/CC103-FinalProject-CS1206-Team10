@@ -25,10 +25,11 @@ struct User {
 };
 
 deque<User> userQueue;
+User currentServedUser = {"", false, 0};  // Track currently served user
 int userSeq = 0;
 // ---------------- MOVIES ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
-vector<string> times = {"10:00 AM", "1:00 PM", "4:00 PM"};
+vector<string> times  = {"10:00 AM - 12:40 PM", "1:00 PM - 2:30 PM",  "4:00 PM - 5:45 PM"};
 vector<int> moviePrices = {500, 450, 400};
 
 // Seats per movie (3 movies, 10 seats each)
@@ -60,6 +61,70 @@ string readString() {
     cin >> s;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     return s;
+}
+
+
+string trimCopy(const string& text) {
+    size_t start = text.find_first_not_of(" \t\r\n");
+    if (start == string::npos) return "";
+    size_t end = text.find_last_not_of(" \t\r\n");
+    return text.substr(start, end - start + 1);
+}
+
+int findMovieIndex(const string& movieName) {
+    for (int i = 0; i < (int)movies.size(); ++i) {
+        if (movies[i] == movieName)
+            return i;
+    }
+    return -1;
+}
+
+void loadBookingsFromFile() {
+    ifstream file("bookings.txt");
+    if (!file) return;
+
+    for (auto& movieSeats : seats) {
+        fill(movieSeats.begin(), movieSeats.end(), false);
+    }
+
+    string line;
+    int currentTicketId = -1;
+    int currentMovieIndex = -1;
+    int currentSeat = -1;
+    string currentStatus;
+
+    auto finalizeRecord = [&]() {
+        if (currentTicketId > ticketID)
+            ticketID = currentTicketId;
+
+        if (currentStatus == "CONFIRMED" && currentMovieIndex >= 0 && currentSeat >= 1 && currentSeat <= 10) {
+            seats[currentMovieIndex][currentSeat - 1] = true;
+        }
+
+        currentTicketId = -1;
+        currentMovieIndex = -1;
+        currentSeat = -1;
+        currentStatus.clear();
+    };
+
+    while (getline(file, line)) {
+        if (line.rfind("Ticket ID  :", 0) == 0) {
+            currentTicketId = stoi(trimCopy(line.substr(line.find(':') + 1)));
+        } else if (line.rfind("Movie      :", 0) == 0) {
+            currentMovieIndex = findMovieIndex(trimCopy(line.substr(line.find(':') + 1)));
+        } else if (line.rfind("Seat       :", 0) == 0) {
+            currentSeat = stoi(trimCopy(line.substr(line.find(':') + 1)));
+        } else if (line.rfind("Status     :", 0) == 0) {
+            currentStatus = trimCopy(line.substr(line.find(':') + 1));
+        } else if (line.find("--------------------------------------") != string::npos) {
+            finalizeRecord();
+        }
+    }
+
+    finalizeRecord();
+
+    if (ticketID < 1000)
+        ticketID = 1000;
 }
 
 // ---------------- DECLARATIONS ----------------
@@ -202,10 +267,9 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
         cout << "Invalid payment method. Booking cancelled.\n"
         return;
     }
+    
     cout << "Processing payment";
-    for(int i=0; i<3; i++) {
-    cout << "."; 
-    cout.flush(); }
+    for (int i = 0; i < 3; i++) { cout << "."; cout.flush(); }
     cout << "\n";
     
     if (pay == 1) cout << "Payment method: GCash\n";
@@ -214,6 +278,7 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
     // ---------------- CONFIRM ---------------
     cout << "\nConfirm booking? (Y/N): ";
     char confirm = readChar();
+    
         if (confirm != 'Y' && confirm != 'y') {
         cout << "Booking cancelled.\n";
         return;
@@ -441,3 +506,30 @@ int main() {
     
         return 0;
     }
+
+// ---------------- ADD USER (helper) ----------------
+void addUserPrompt() {
+    cout << "Enter name: ";
+    string name = readString();
+
+    string utype;
+    bool validType = false;
+    while (!validType) {
+        cout << "VIP or Regular? ";
+        utype = readString();
+        for (char& c : utype) c = toupper(c);
+        
+        if (utype == "VIP" || utype == "REGULAR") {
+            validType = true;
+        } else {
+            cout << "Invalid type. Please enter 'VIP' or 'Regular'.\n";
+        }
+    }
+
+    bool isVip = (utype == "VIP");
+    userSeq++;
+    userQueue.push_back({name, isVip, userSeq});
+
+    if (isVip) cout << name << " added to VIP queue.\n";
+    else       cout << name << " added to Regular queue.\n";
+}
