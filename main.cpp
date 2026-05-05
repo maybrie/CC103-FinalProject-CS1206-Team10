@@ -625,265 +625,459 @@ void deleteMovie() {
     cout << "Movie deleted successfully. Booking undo history was cleared to keep indices valid.\n";
 }
 
-// ---------------- ADMIN DASHBOARD ----------------
-void adminDashboard() {
-    ifstream file("bookings.txt");
-
-    if (!file || file.peek() == EOF) {
-        cout << "No booking records found.\n";
+void addSeatsToMovie() {
+    if (movies.empty()) {
+        cout << "No movies available.\n";
         return;
     }
 
-    cout << "\n============ ADMIN DASHBOARD ============\n";
-    string line;
-    while (getline(file, line)) {
-        cout << line << "\n";
+    cout << "\n--- Add Seats ---\n";
+    for (int i = 0; i < (int)movies.size(); i++) {
+        cout << "  " << i + 1 << ". " << movies[i] << " (Current seats: " << seats[i].size() << ")\n";
     }
-    file.close();
-    cout << "=========================================\n";
+
+    cout << "Select movie (1-" << movies.size() << "): ";
+    int m = readInt();
+    if (m < 1 || m > (int)movies.size()) {
+        cout << "Invalid selection.\n";
+        return;
+    }
+    int idx = m - 1;
+
+    cout << "\nAdd seats to " << movies[idx] << "\n";
+    cout << "Current VIP seats: " << vipSeatCounts[idx] << ", Current regular seats: " << (seats[idx].size() - vipSeatCounts[idx]) << ", Total: " << seats[idx].size() << "\n";
+    cout << "\n1. Add VIP seats\n";
+    cout << "2. Add regular seats\n";
+    cout << "Choice: ";
+    int choice = readInt();
+
+    if (choice == 1) {
+        cout << "How many VIP seats to add? ";
+        int addCount = readInt();
+        if (addCount <= 0) {
+            cout << "Count must be greater than 0.\n";
+            return;
+        }
+        int currentVipCount = vipSeatCounts[idx];
+        // Insert new VIP seats at the boundary between VIP and regular seats.
+        seats[idx].insert(seats[idx].begin() + currentVipCount, addCount, false);
+        vipSeatCounts[idx] = currentVipCount + addCount;
+        saveMoviesToFile();
+        cout << "VIP seats added successfully. " << movies[idx] << " now has " << vipSeatCounts[idx] << " VIP seats.\n";
+    } else if (choice == 2) {
+        cout << "How many regular seats to add? ";
+        int addCount = readInt();
+        if (addCount <= 0) {
+            cout << "Count must be greater than 0.\n";
+            return;
+        }
+        seats[idx].insert(seats[idx].end(), addCount, false);
+        saveMoviesToFile();
+        cout << "Regular seats added successfully. " << movies[idx] << " now has " << (seats[idx].size() - vipSeatCounts[idx]) << " regular seats.\n";
+    } else {
+        cout << "Invalid choice.\n";
+    }
 }
 
-// ---------------- SERVE USERS ----------------
+void manageMovies() {
+    int choice;
+    do {
+        cout << "\n----- Manage Movies -----\n";
+        cout << "1. Add Movie\n";
+        cout << "2. Edit Movie\n";
+        cout << "3. Delete Movie\n";
+        cout << "4. Back\n";
+        cout << "Choice: ";
+        choice = readInt();
+
+        switch (choice) {
+        case 1:
+            addMovie();
+            break;
+        case 2:
+            editMovie();
+            break;
+        case 3:
+            deleteMovie();
+            break;
+        case 4:
+            return;
+        default:
+            cout << "Invalid choice. Please enter 1-4.\n";
+        }
+    } while (true);
+}
+
 void serveUser() {
     if (!userQueue.empty()) {
         int vipIndex = -1;
         for (size_t i = 0; i < userQueue.size(); ++i) {
-            if (userQueue[i].vip) { vipIndex = (int)i; break; }
+            if (userQueue[i].vip) {
+                vipIndex = static_cast<int>(i);
+                break;
+            }
         }
 
         if (vipIndex != -1) {
-            User u = userQueue[vipIndex];
-            currentServedUser = u;  // Store served user
-            cout << "Now serving VIP: " << u.name << "\n";
+            currentServedUser = userQueue[vipIndex];
+            cout << "Now serving VIP: " << currentServedUser.name << '\n';
             userQueue.erase(userQueue.begin() + vipIndex);
         } else {
-            User u = userQueue.front();
-            currentServedUser = u;  // Store served user
-            cout << "Now serving Regular: " << u.name << "\n";
+            currentServedUser = userQueue.front();
+            cout << "Now serving Regular: " << currentServedUser.name << '\n';
             userQueue.pop_front();
         }
     } else {
-        cout << "No users in queue." << "\n";
+        // Clear the currently served user when serve is clicked and queue is empty
+        currentServedUser = {"", false, 0};
+        cout << "No users in queue. Not serving anyone now.\n";
     }
 }
 
-//----------------- MAIN ----------------
-int main() {
-    loadBookingsFromFile();
-    
-    cout << "============================================\n";
-    cout << "     Welcome to CineMate Ticketing System  \n";
-    cout << "============================================\n";
+void enqueueCustomer(const string& name, bool isVip) {
+    userSeq++;
+    userQueue.push_back({name, isVip, userSeq});
+    usedNames.insert(normalizeName(name));
+    if (isVip) cout << name << " joined the VIP queue.\n";
+    else cout << name << " joined the Regular queue.\n";
+}
 
-    string name, type;
+bool servedCustomerSession(const string& name, bool isVip) {
+    int choice;
+    do {
+        cout << "\n----- Served Customer Booking Menu -----\n";
+        cout << "Customer: " << name << '\n';
+        cout << "1. View Movies & Prices\n";
+        cout << "2. View Available Seats\n";
+        cout << "3. Book Ticket (for you)\n";
+        cout << "4. Undo Last Booking\n";
+        cout << "5. View Sorted Booked Seats\n";
+        cout << "6. Exit Booking\n";
+        cout << "Choice: ";
+        choice = readInt();
 
-    cout << "Enter your name: ";
+        switch (choice) {
+        case 1:
+            cout << "\n--- Movies Now Showing ---\n";
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << " | " << times[i] << " | PHP " << moviePrices[i] << " | Showing until: " << showingUntil[i];
+                if (isVip) cout << " (VIP price: PHP " << moviePrices[i] * 0.90 << ")";
+                cout << '\n';
+            }
+            break;
+        case 2: {
+            cout << "\n--- Movies Now Showing ---\n";
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << " (" << times[i] << ") - PHP " << moviePrices[i] << " | Showing until: " << showingUntil[i] << '\n';
+            }
+            if (movies.empty()) {
+                cout << "No movies available.\n";
+                break;
+            }
+            cout << "Select movie (1-" << movies.size() << "): ";
+            int m = readInt();
+            if (m < 1 || m > (int)movies.size()) {
+                cout << "Invalid selection.\n";
+                break;
+            }
+            viewSeatsByType(m - 1, isVip ? "VIP" : "Regular");
+            break;
+        }
+        case 3: {
+            cout << "\n--- Booking for: " << name << " ---\n";
+            cout << "\n--- Movies Now Showing ---\n";
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << " (" << times[i] << ") - PHP " << moviePrices[i] << " | Showing until: " << showingUntil[i] << '\n';
+            }
+            if (movies.empty()) {
+                cout << "No movies available.\n";
+                break;
+            }
+            cout << "Select movie (1-" << movies.size() << "): ";
+            int m = readInt();
+            if (m < 1 || m > (int)movies.size()) {
+                cout << "Invalid selection.\n";
+                break;
+            }
+
+            cout << "How many seats to book? ";
+            int n = readInt();
+            if (n < 1) {
+                cout << "Invalid number.\n";
+                break;
+            }
+
+            int available = 0;
+            int vipLimit = vipSeatCounts[m - 1];
+            int start = isVip ? 0 : vipLimit;
+            int end = isVip ? vipLimit : (int)seats[m - 1].size();
+            for (int i = start; i < end; i++) if (!seats[m - 1][i]) available++;
+
+            if (n > available) {
+                if (isVip) {
+                    int regAvailable = 0;
+                    for (int i = vipLimit; i < (int)seats[m - 1].size(); ++i) if (!seats[m - 1][i]) regAvailable++;
+
+                    cout << "Only " << available << " VIP seat(s) available.\n";
+                    if (regAvailable >= n) {
+                        cout << "VIP seats insufficient, but " << regAvailable << " regular seat(s) are available.\n";
+                        cout << "Options:\n  1. Book regular seats instead\n  2. Cancel\nChoice: ";
+                        int opt = readInt();
+                        if (opt == 1) bookSeats(n, m - 1, "Regular", name);
+                        else cout << "Booking cancelled.\n";
+                    } else {
+                        cout << "VIP seats are full and not enough regular seats available. Booking cancelled.\n";
+                    }
+                } else {
+                    cout << "Only " << available << " seat(s) available for your type. Booking cancelled.\n";
+                }
+                break;
+            }
+
+            bookSeats(n, m - 1, isVip ? "VIP" : "Regular", name);
+            break;
+        }
+        case 4:
+            undoBooking();
+            break;
+        case 5: {
+            cout << "\n--- Movies Now Showing ---\n";
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << '\n';
+            }
+            if (movies.empty()) {
+                cout << "No movies available.\n";
+                break;
+            }
+            cout << "Select movie (1-" << movies.size() << "): ";
+            int m = readInt();
+            if (m < 1 || m > (int)movies.size()) {
+                cout << "Invalid selection.\n";
+                break;
+            }
+            sortBooked(m - 1);
+            break;
+        }
+        case 6:
+            cout << "Exiting booking menu...\n";
+            currentServedUser = {"", false, 0};
+            return false;
+        default:
+            cout << "Invalid choice. Please enter 1, 2, 3, 4, 5, or 6.\n";
+        }
+    } while (true);
+}
+
+bool regularCustomerSession(const string& name, bool isVip) {
+    int choice;
+    do {
+        cout << "\n----- Customer Menu -----\n";
+        cout << "Customer: " << name << '\n';
+        cout << "1. View Movies & Prices\n";
+        cout << "2. Back to Main Menu\n";
+        cout << "3. Exit\n";
+        cout << "Choice: ";
+        choice = readInt();
+
+        switch (choice) {
+        case 1:
+            cout << "\n--- Movies Now Showing ---\n";
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << " | " << times[i] << " | PHP " << moviePrices[i] << " | Showing until: " << showingUntil[i];
+                if (isVip) cout << " (VIP price: PHP " << moviePrices[i] * 0.90 << ")";
+                cout << '\n';
+            }
+            break;
+        case 2:
+            cout << "Returning to main menu...\n";
+            return false;
+        case 3:
+            cout << "\nThank you for using CineMate! Goodbye!\n";
+            return true;
+        default:
+            cout << "Invalid choice. Please enter 1-3.\n";
+        }
+    } while (true);
+}
+
+bool customerSession() {
+    cout << "\n========== CUSTOMER MODE ==========\n";
+
+    string name;
+    cout << "Enter customer name: ";
     name = readString();
 
+    if (isReservedAdminName(name)) {
+        cout << "That name is reserved for admin. Please use another name.\n";
+        return false;
+    }
+
+    // If this matches the currently served user, skip the "used name" rejection
+    bool isServedCustomer = !currentServedUser.name.empty() &&
+        normalizeName(currentServedUser.name) == normalizeName(name);
+
+    // Prevent reuse of customer names (including from previous bookings), unless currently being served
+    if (!isServedCustomer && usedNames.find(normalizeName(name)) != usedNames.end()) {
+        cout << "That name has already been used. Please enter a different name.\n";
+        return false;
+    }
+
+    string type;
     bool validType = false;
     while (!validType) {
         cout << "Customer type (VIP / Regular): ";
         type = readString();
-        
-    for (char& c : type) c = toupper(c);
-
-    if (type == "VIP" || type == "REGULAR") {
-            validType = true;
-        } else {
-            cout << "Invalid type. Please enter 'VIP' or 'Regular'.\n";
-        }
+        for (char& c : type) c = static_cast<char>(toupper(static_cast<unsigned char>(c)));
+        if (type == "VIP" || type == "REGULAR") validType = true;
+        else cout << "Invalid type. Please enter 'VIP' or 'Regular'.\n";
     }
 
-    if (type == "VIP") {
-       userSeq++;
-        userQueue.push_back({name, true, userSeq});
-        cout << "Welcome, VIP customer " << name << "! You enjoy a 10% seat discount.\n";
-    } else {
-        type = "Regular";
-        userSeq++;
-        userQueue.push_back({name, false, userSeq});
-        cout << "Welcome, " << name << "!\n";
+    bool isVip = (type == "VIP");
+
+    if (isServedCustomer) {
+        servedCustomerSession(name, isVip);
+        return false;
     }
+
+    enqueueCustomer(name, isVip);
+    regularCustomerSession(name, isVip);
+    return false;
+}
+
+bool adminSession() {
+    cout << "\n========== ADMIN LOGIN ==========\n";
+
+    string adminName;
+    cout << "Enter admin name: ";
+    adminName = readString();
+
+    if (!isReservedAdminName(adminName)) {
+        cout << "Invalid admin name. Use " << ADMIN_NAME << ".\n";
+        return false;
+    }
+
+    if (!authenticateAdmin()) {
+        cout << "Admin login failed. Returning to main menu.\n";
+        return false;
+    }
+
+    currentServedUser = {"", false, 0};
+    cout << "Welcome, " << ADMIN_NAME << "!\n";
 
     int choice;
-
     do {
-        cout << "\n========== MAIN MENU ==========\n";
+        cout << "\n========== ADMIN MENU ==========\n";
+        cout << "Admin: " << ADMIN_NAME << '\n';
+        cout << "Serving Customer: " << (currentServedUser.name.empty() ? "None" : currentServedUser.name) << '\n';
         cout << "1. View Movies & Prices\n";
         cout << "2. View Available Seats\n";
-        cout << "3. Book Ticket\n";
-        cout << "4. Undo Last Booking\n";
-        cout << "5. View Sorted Booked Seats\n";
-        cout << "6. Add User to Queue\n";
-        cout << "7. Serve Next User\n";
-        cout << "8. Admin Dashboard\n";
+        cout << "3. View Sorted Booked Seats\n";
+        cout << "4. Serve Next User\n";
+        cout << "5. Admin Dashboard\n";
+        cout << "6. Manage Movies (Add/Edit/Delete)\n";
+        cout << "7. Add Seats to Movie\n";
+        cout << "8. Back to Main Menu\n";
         cout << "9. Exit\n";
         cout << "================================\n";
         cout << "Choice: ";
         choice = readInt();
 
         switch (choice) {
-            
-            case 1: 
-                    if (currentServedUser.name.empty()) {
-                cout << "No customer currently being served. Use option 7 first.\n";
-                break;
-            }
+        case 1:
             cout << "\n--- Movies Now Showing ---\n";
-            {
-                User currentUser = currentServedUser;
-                for (int i = 0; i < (int)movies.size(); i++) {
-                    cout << "  " << i + 1 << ". " << movies[i]
-                         << " | " << times[i]
-                         << " | PHP " << moviePrices[i];
-                    if (currentUser.vip)
-                        cout << " (You pay: PHP " << moviePrices[i] * 0.90 << " with 10% VIP discount)";
-                    cout << "\n";
-                }
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << " | " << times[i] << " | PHP " << moviePrices[i] << " | Showing until: " << showingUntil[i] << '\n';
             }
             break;
-            
-            case 2: {
-                 if (currentServedUser.name.empty()) {
-                cout << "No customer currently being served. Use option 7 first.\n";
+        case 2: {
+            cout << "\n--- Movies Now Showing ---\n";
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << " (" << times[i] << ") - PHP " << moviePrices[i] << '\n';
+            }
+            if (movies.empty()) {
+                cout << "No movies available.\n";
                 break;
             }
-                
-                    cout << "\n--- Movies Now Showing ---\n"; 
-                    for (int i = 0; i < (int)movies.size(); i++)
-                        cout << "  " << i + 1 << ". " << movies[i]
-                             << " (" << times[i] << ")"
-                             << " - PHP " << moviePrices[i] << "\n";
-                    cout << "Select movie (1-3): ";
-                    int m = readInt();
-                
-                    User currentUser = currentServedUser;
-                    string userType = currentUser.vip ? "VIP" : "Regular";
-                    viewSeatsByType(m - 1, userType);
-                    viewSeatsByType(m - 1, type);     
-                    break;
-            }
-        
-            case 3: {
-                     // Get currently served user
-                if (currentServedUser.name.empty()) {
-                    cout << "No customer currently being served. Use option 7 first.\n";
-                    break;
-                }
-
-                User currentUser = currentServedUser;
-                string userType = currentUser.vip ? "VIP" : "Regular";
-
-                    cout << "\n--- Serving: " << currentUser.name << " (" << userType << ") ---\n";
-                    cout << "\n--- Movies Now Showing ---\n";
-                    for (int i = 0; i < (int)movies.size(); i++) {
-                        cout << "  " << i + 1 << ". " << movies[i]
-                             << " (" << times[i] << ")"
-                             << " - PHP " << moviePrices[i] << "\n";
-                    }
-                    cout << "Select movie (1-3): ";
-                    int m = readInt();
-                    if (m < 1 || m > 3) { cout << "Invalid selection.\n"; break; }
-        
-                    cout << "How many seats to book? ";
-                    int n = readInt();
-                    if (n < 1) { cout << "Invalid number.\n"; break; }
-        
-                    // Check enough seats available for this type
-                    int available = 0;
-                    int start = (type == "VIP") ? 0 : 3;
-                    int end   = (type == "VIP") ? 3 : 10;
-                    for (int i = start; i < end; i++)
-                        if (!seats[m - 1][i]) available++;
-        
-                    if (n > available) {
-                        if (type == "VIP") {
-                            int regAvailable = 0;
-                            for (int i = 3; i < 10; ++i)
-                                if (!seats[m - 1][i]) regAvailable++;
-        
-                            cout << "Only " << available << " VIP seat(s) available.\n";
-        
-                            if (regAvailable >= n) {
-                                cout << "VIP seats insufficient, but " << regAvailable << " regular seat(s) are available.\n";
-                                cout << "Options:\n  1. Book regular seats instead\n  2. Cancel\nChoice: ";
-                                int opt = readInt();
-                                if (opt == 1) {
-                                    bookSeats(n, m - 1, "Regular", name);
-                                } else {
-                                    cout << "Booking cancelled.\n";
-                                }
-                            } else {
-                                cout << "VIP seats are full and not enough regular seats available. Booking cancelled.\n";
-                            }
-                        } else {
-                            cout << "Only " << available << " seat(s) available for " << type << " customers.\n";
-                        }
-                        break;
-                    }
-        
-                    bookSeats(n, m - 1, userType, currentUser.name);
-                    break;
-            }
-            
-            case 4: undoBooking(); 
-                break; 
-            
-            case 5: cout << "\n--- Movies Now Showing ---\n"; 
-                    for (int i = 0; i < (int)movies.size(); i++)
-                        cout << "  " << i + 1 << ". " << movies[i] << "\n";
-                    cout << "Select movie (1-3): ";
-                    int m = readInt();
-                    if (m < 1 || m > 3) { cout << "Invalid selection.\n"; break; }
-                    sortBooked(m - 1);
+            cout << "Select movie (1-" << movies.size() << "): ";
+            int m = readInt();
+            if (m < 1 || m > (int)movies.size()) {
+                cout << "Invalid selection.\n";
                 break;
             }
-
-            case 6: addUserPrompt();
-                break;
-    
-            case 7: serveUser(); 
-                break;
-    
-            case 8: adminDashboard(); 
-                break;
-    
-            case 9:
-                cout << "\nThank you for using CineMate! Goodbye, " << name << "!\n";
-                break;
-    
-            default:
-                cout << "Invalid choice. Please enter 1-8.\n";
+            viewVipSeats(m - 1);
+            viewRegularSeats(m - 1);
+            break;
+        }
+        case 3: {
+            cout << "\n--- Movies Now Showing ---\n";
+            for (int i = 0; i < (int)movies.size(); i++) {
+                cout << "  " << i + 1 << ". " << movies[i] << '\n';
             }
+            if (movies.empty()) {
+                cout << "No movies available.\n";
+                break;
+            }
+            cout << "Select movie (1-" << movies.size() << "): ";
+            int m = readInt();
+            if (m < 1 || m > (int)movies.size()) {
+                cout << "Invalid selection.\n";
+                break;
+            }
+            sortBooked(m - 1);
+            break;
+        }
+        case 4:
+            serveUser();
+            break;
+        case 5:
+            adminDashboard();
+            break;
+        case 6:
+            manageMovies();
+            break;
+        case 7:
+            addSeatsToMovie();
+            break;
+        case 8:
+            cout << "Returning to main menu...\n";
+            return false;
+        case 9:
+            cout << "\nThank you for using CineMate! Goodbye!\n";
+            return true;
+        default:
+            cout << "Invalid choice. Please enter 1-9.\n";
+        }
+    } while (true);
+}
 
-        } while (choice != 9);
-    
-        return 0;
-    }
+int main() {
+    loadMoviesFromFile();
+    loadBookingsFromFile();
 
-// ---------------- ADD USER (helper) ----------------
-void addUserPrompt() {
-    cout << "Enter name: ";
-    string name = readString();
+    cout << "============================================\n";
+    cout << "     Welcome to CineMate Ticketing System  \n";
+    cout << "============================================\n";
 
-    string utype;
-    bool validType = false;
-    while (!validType) {
-        cout << "VIP or Regular? ";
-        utype = readString();
-        for (char& c : utype) c = toupper(c);
-        
-        if (utype == "VIP" || utype == "REGULAR") {
-            validType = true;
+    while (true) {
+        cout << "\n========== MAIN MENU ==========\n";
+        cout << "1. Customer\n";
+        cout << "2. Admin\n";
+        cout << "3. Exit\n";
+        cout << "================================\n";
+        cout << "Choice: ";
+
+        int choice = readInt();
+        if (choice == 1) {
+            if (customerSession()) break;
+        } else if (choice == 2) {
+            if (adminSession()) break;
+        } else if (choice == 3) {
+            cout << "\nThank you for using CineMate! Goodbye!\n";
+            break;
         } else {
-            cout << "Invalid type. Please enter 'VIP' or 'Regular'.\n";
+            cout << "Invalid choice. Please enter 1-3.\n";
         }
     }
 
-    bool isVip = (utype == "VIP");
-    userSeq++;
-    userQueue.push_back({name, isVip, userSeq});
-
-    if (isVip) cout << name << " added to VIP queue.\n";
-    else       cout << name << " added to Regular queue.\n";
+    return 0;
 }
