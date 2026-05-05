@@ -45,8 +45,14 @@ string trimCopy(const string& text) {
     return text.substr(start, end - start + 1);
 }
 
-
-// ---------------- INPUT HELPERS ----------------
+string normalizeName(const string& text) {
+    string normalized = trimCopy(text);
+    transform(normalized.begin(), normalized.end(), normalized.begin(), [](unsigned char c) {
+      return  static_cast<char>(tolower(c));
+    });
+    return normalized;
+}
+
 int readInt() {
     int val;
     while (!(cin >> val)) {
@@ -59,18 +65,31 @@ int readInt() {
 }
 
 char readchar() {
-char c;
-cin.get(c);
-return c;
+    char c;
+    cin.get(c);
+    return c;
 }
 
 string readString() {
     string s;
-    cin >> s;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin >> ws,s);
+    cin >> s;
     return s;
 }
+bool isReservedAdminName(const string& name) {
+return normalizeName == normalizeName(ADMIN_NAME);
+}
 
+bool authenticateAdmin() {
+    string password;
+    cout << "Enter admin password: ";
+    password = readString();
+    return password == ADMIN_PASSWORD;
+}
+
+bool verifyAdminAction() {
+    return true;
+}
 
 string trimCopy(const string& text) {
     size_t start = text.find_first_not_of(" \t\r\n");
