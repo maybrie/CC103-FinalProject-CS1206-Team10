@@ -179,6 +179,19 @@ void loadBookingsFromFile() {
     }
 }
 
+void appendBookingRecord(const string& customerName, int movieIndex, int seatNumber, const string& type, double finalPrice) {
+    ofstream file("bookings.txt", ios::app);
+    file << "Ticket ID  : " << ticketID << '\n';
+    file << "Customer   : " << customerName << '\n';
+    file << "Movie      : " << movies[movieIndex] << '\n';
+    file << "Showtime   : " << times[movieIndex] << '\n';
+    file << "Seat       : " << seatNumber << '\n';
+    file << "Type       : " << type << '\n';
+    file << "Final Price: PHP " << finalPrice << '\n';
+    file << "Status     : CONFIRMED\n";
+    file << "--------------------------------------\n";
+}
+
 // ---------------- BOOK SEATS (RECURSIVE) ----------------
 void bookSeats(int count, int m, const string& type, const string& customerName) {
     if (count == 0) return;
