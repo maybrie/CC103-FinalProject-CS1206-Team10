@@ -91,74 +91,6 @@ bool verifyAdminAction() {
     return true;
 }
 
-string trimCopy(const string& text) {
-    size_t start = text.find_first_not_of(" \t\r\n");
-    if (start == string::npos) return "";
-    size_t end = text.find_last_not_of(" \t\r\n");
-    return text.substr(start, end - start + 1);
-}
-
-int findMovieIndex(const string& movieName) {
-    for (int i = 0; i < (int)movies.size(); ++i) {
-        if (movies[i] == movieName)
-            return i;
-    }
-    return -1;
-}
-
-void loadBookingsFromFile() {
-    ifstream file("bookings.txt");
-    if (!file) return;
-
-    for (auto& movieSeats : seats) {
-        fill(movieSeats.begin(), movieSeats.end(), false);
-    }
-
-    string line;
-    int currentTicketId = -1;
-    int currentMovieIndex = -1;
-    int currentSeat = -1;
-    string currentStatus;
-
-    auto finalizeRecord = [&]() {
-        if (currentTicketId > ticketID)
-            ticketID = currentTicketId;
-
-        if (currentStatus == "CONFIRMED" && currentMovieIndex >= 0 && currentSeat >= 1 && currentSeat <= 10) {
-            seats[currentMovieIndex][currentSeat - 1] = true;
-        }
-
-        currentTicketId = -1;
-        currentMovieIndex = -1;
-        currentSeat = -1;
-        currentStatus.clear();
-    };
-
-    while (getline(file, line)) {
-        if (line.rfind("Ticket ID  :", 0) == 0) {
-            currentTicketId = stoi(trimCopy(line.substr(line.find(':') + 1)));
-        } else if (line.rfind("Movie      :", 0) == 0) {
-            currentMovieIndex = findMovieIndex(trimCopy(line.substr(line.find(':') + 1)));
-        } else if (line.rfind("Seat       :", 0) == 0) {
-            currentSeat = stoi(trimCopy(line.substr(line.find(':') + 1)));
-        } else if (line.rfind("Status     :", 0) == 0) {
-            currentStatus = trimCopy(line.substr(line.find(':') + 1));
-        } else if (line.find("--------------------------------------") != string::npos) {
-            finalizeRecord();
-        }
-    }
-
-    finalizeRecord();
-
-    if (ticketID < 1000)
-        ticketID = 1000;
-}
-
-// ---------------- DECLARATIONS ----------------
-void viewVipSeats(int m);
-void viewRegularSeats(int m);
-void addUserPrompt();
-
 // ---------------- VIEW SEATS FUNCTIONS ----------------
 
 void viewVipSeats(int m) {
@@ -176,10 +108,8 @@ void viewRegularSeats(int m) {
 }
 
 void viewSeatsByType(int m, const string& type) {
-    if (type == "VIP")
-        viewVipSeats(m);
-    else
-        viewRegularSeats(m);
+    if (type == "VIP") viewVipSeats(m);
+    else viewRegularSeats(m);
 }
 
 // ---------------- SORT ----------------
@@ -200,6 +130,53 @@ void sortBooked(int m) {
     cout << "Sorted booked seats for " << movies[m] << ": ";
     for (int seatNumber : booked) cout << seatNumber << ' ';
     cout << '\n';
+}
+
+void loadBookingsFromFile() {
+    ifstream file("bookings.txt");
+    if (!file) return;
+
+    string line;
+    int currentMovie = -1;
+    int currentSeat = -1;
+    string currentStatus;
+
+    while (getline(file, line)) {
+        if (line.rfind("Ticket ID  :", 0) == 0) {
+            size_t pos = line.find(':');
+            if (pos != string::npos) {
+                string customerName = trimCopy(line.substr(pos + 1));
+                if (!customerName.empty()) usedNames.insert(normalizeName(customerName));
+            }
+            continue;
+        }
+        if (line.rfind("Ticket ID", 0) == 0) {
+            size_t pos = line.find(':');
+            if (pos != string::npos) {
+                int id = stoi(trimCopy(line.substr(pos + 1)));
+                if (id >= ticketID) ticketID = id + 1;
+            }
+        } else if (line.rfind("Movie", 0) == 0) {
+            size_t pos = line.find(':');
+            string movieName = trimCopy(line.substr(pos + 1));
+            currentMovie = -1;
+            for (int i = 0; i < (int)movies.size(); i++) {
+                if (movies[i] == movieName) {
+                    currentMovie = i;
+                    break;
+                }
+            }
+        } else if (line.rfind("Seat", 0) == 0) {
+            size_t pos = line.find(':');
+            if (pos != string::npos) currentSeat = stoi(trimCopy(line.substr(pos + 1)));
+        } else if (line.rfind("Status", 0) == 0) {
+            size_t pos = line.find(':');
+            currentStatus = trimCopy(line.substr(pos + 1));
+            if (currentMovie != -1 && currentSeat >= 1 && currentSeat <= 10 && currentStatus == "CONFIRMED") {
+                seats[currentMovie][currentSeat - 1] = true;
+            }
+        }
+    }
 }
 
 // ---------------- BOOK SEATS (RECURSIVE) ----------------
