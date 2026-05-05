@@ -29,14 +29,19 @@ User currentServedUser = {"", false, 0};
 int userSeq = 0;
 int ticketID = 1000;
 
-// ---------------- MOVIES ----------------
+const string ADMIN_NAME = "Maria";
+const string ADMIN_PASSWORD = "Admin@123";
+
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
 vector<string> times  = {"10:00 AM - 12:40 PM", "1:00 PM - 2:30 PM",  "4:00 PM - 5:45 PM"};
 vector<int> moviePrices = {500, 450, 400};
+vector<vector<bool>> seats(3,vector<bool>(10,false));
 
-// Seats per movie (3 movies, 10 seats each)
-vector<vector<bool>> seats(3, vector<bool>(10, false));
-
+string trimCopy(const string& text) {
+    size_t start = text.find_last_not_of("\t\r\n");
+    if(start == string::npos) return""; size_t end = text.find_last_not_of(" \t\r\n");
+    return text.substr(start, end - start + 1);
+}
 
 
 // ---------------- INPUT HELPERS ----------------
