@@ -1,10 +1,6 @@
 #include <algorithm>
-#include <cctype>
 #include <deque>
-#include <fstream>
 #include <iostream>
-#include <limits>
-#include <sstream>
 #include <unordered_set>
 #include <stack>
 #include <string>
@@ -18,6 +14,19 @@ struct Booking {
     int ticketID;
 };
 
+struct BookingRecord {
+    string customerName;
+    string movieName;
+    string date;
+    string showtime;
+    int seat;
+    string type;
+    string paymentInfo;
+    double finalPrice;
+    int ticketID;
+    string status;
+};
+
 struct User {
     string name;
     bool vip;
@@ -25,13 +34,14 @@ struct User {
 };
 
 stack<Booking> bookingHistory;
+vector<BookingRecord> bookingLedger;
 deque<User> userQueue;
 unordered_set<string> usedNames;
 User currentServedUser = {"", false, 0};
 int userSeq = 0;
 int ticketID = 1000;
 
-const string ADMIN_NAME = "Maria";
+const string ADMIN_NAME = "Admin";
 const string ADMIN_PASSWORD = "Admin@123";
 const int VIP_SEAT_COUNT = 3;
 const int DEFAULT_SEAT_COUNT = 10;
@@ -45,67 +55,18 @@ vector<vector<bool>> seats(movies.size(), vector<bool>(DEFAULT_SEAT_COUNT, false
 
 string trimCopy(const string& text);
 
-void saveMoviesToFile() {
-    ofstream file("movies.txt");
-    if (!file) return;
-
-    for (int i = 0; i < (int)movies.size(); i++) {
-        file << movies[i] << '|' << times[i] << '|' << moviePrices[i] << '|' << showingUntil[i] << '|' << vipSeatCounts[i] << '|' << seats[i].size() << '\n';
-    }
+char toLowerAscii(char c) {
+    if (c >= 'A' && c <= 'Z') return static_cast<char>(c - 'A' + 'a');
+    return c;
 }
 
-void loadMoviesFromFile() {
-    ifstream file("movies.txt");
-    if (!file) return;
+char toUpperAscii(char c) {
+    if (c >= 'a' && c <= 'z') return static_cast<char>(c - 'a' + 'A');
+    return c;
+}
 
-    vector<string> loadedMovies;
-    vector<string> loadedTimes;
-    vector<int> loadedPrices;
-    vector<string> loadedShowingUntil;
-    vector<int> loadedVipCounts;
-    vector<vector<bool>> loadedSeats;
-
-    string line;
-    while (getline(file, line)) {
-        if (trimCopy(line).empty()) continue;
-
-        stringstream ss(line);
-        string name, showtime, priceStr, untilDate, vipStr, seatsStr;
-
-        if (!getline(ss, name, '|')) continue;
-        if (!getline(ss, showtime, '|')) continue;
-        if (!getline(ss, priceStr, '|')) continue;
-        if (!getline(ss, untilDate, '|')) continue;
-        if (!getline(ss, vipStr, '|')) continue;
-        if (!getline(ss, seatsStr, '|')) continue;
-
-        try {
-            int price = stoi(trimCopy(priceStr));
-            int vipCount = stoi(trimCopy(vipStr));
-            int seatCount = stoi(trimCopy(seatsStr));
-            if (price <= 0) continue;
-            if (vipCount < VIP_SEAT_COUNT) vipCount = VIP_SEAT_COUNT;
-            if (seatCount < vipCount) seatCount = vipCount;
-
-            loadedMovies.push_back(name);
-            loadedTimes.push_back(showtime);
-            loadedPrices.push_back(price);
-            loadedShowingUntil.push_back(untilDate.empty() ? string("N/A") : untilDate);
-            loadedVipCounts.push_back(vipCount);
-            loadedSeats.push_back(vector<bool>(seatCount, false));
-        } catch (...) {
-            continue;
-        }
-    }
-
-    if (!loadedMovies.empty()) {
-        movies = loadedMovies;
-        times = loadedTimes;
-        moviePrices = loadedPrices;
-        showingUntil = loadedShowingUntil;
-        vipSeatCounts = loadedVipCounts;
-        seats = loadedSeats;
-    }
+void clearInputLine() {
+    cin.ignore(static_cast<streamsize>(1000000), '\n');
 }
 
 string trimCopy(const string& text) {
@@ -118,7 +79,7 @@ string trimCopy(const string& text) {
 string normalizeName(const string& text) {
     string normalized = trimCopy(text);
     transform(normalized.begin(), normalized.end(), normalized.begin(), [](unsigned char c) {
-        return static_cast<char>(tolower(c));
+        return toLowerAscii(static_cast<char>(c));
     });
     return normalized;
 }
@@ -127,10 +88,10 @@ int readInt() {
     int val;
     while (!(cin >> val)) {
         cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        clearInputLine();
         cout << "Invalid input. Try again: ";
     }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    clearInputLine();
     return val;
 }
 
@@ -209,66 +170,8 @@ void sortBooked(int m) {
     cout << '\n';
 }
 
-void loadBookingsFromFile() {
-    ifstream file("bookings.txt");
-    if (!file) return;
-
-    string line;
-    int currentMovie = -1;
-    int currentSeat = -1;
-    string currentStatus;
-
-    while (getline(file, line)) {
-        if (line.rfind("Customer", 0) == 0) {
-            size_t pos = line.find(':');
-            if (pos != string::npos) {
-                string customerName = trimCopy(line.substr(pos + 1));
-                if (!customerName.empty()) usedNames.insert(normalizeName(customerName));
-            }
-            continue;
-        }
-        if (line.rfind("Ticket ID", 0) == 0) {
-            size_t pos = line.find(':');
-            if (pos != string::npos) {
-                int id = stoi(trimCopy(line.substr(pos + 1)));
-                if (id >= ticketID) ticketID = id + 1;
-            }
-        } else if (line.rfind("Movie", 0) == 0) {
-            size_t pos = line.find(':');
-            string movieName = trimCopy(line.substr(pos + 1));
-            currentMovie = -1;
-            for (int i = 0; i < (int)movies.size(); i++) {
-                if (movies[i] == movieName) {
-                    currentMovie = i;
-                    break;
-                }
-            }
-        } else if (line.rfind("Seat", 0) == 0) {
-            size_t pos = line.find(':');
-            if (pos != string::npos) currentSeat = stoi(trimCopy(line.substr(pos + 1)));
-        } else if (line.rfind("Status", 0) == 0) {
-            size_t pos = line.find(':');
-            currentStatus = trimCopy(line.substr(pos + 1));
-            if (currentMovie != -1 && currentSeat >= 1 && currentSeat <= (int)seats[currentMovie].size() && currentStatus == "CONFIRMED") {
-                seats[currentMovie][currentSeat - 1] = true;
-            }
-        }
-    }
-}
-
 void appendBookingRecord(const string& customerName, int movieIndex, int seatNumber, const string& type, double finalPrice, const string& date, const string& paymentInfo) {
-    ofstream file("bookings.txt", ios::app);
-    file << "Ticket ID  : " << ticketID << '\n';
-    file << "Customer   : " << customerName << '\n';
-    file << "Movie      : " << movies[movieIndex] << '\n';
-    file << "Date       : " << date << '\n';
-    file << "Showtime   : " << times[movieIndex] << '\n';
-    file << "Seat       : " << seatNumber << '\n';
-    file << "Type       : " << type << '\n';
-    file << "Payment    : " << paymentInfo << '\n';
-    file << "Final Price: PHP " << finalPrice << '\n';
-    file << "Status     : CONFIRMED\n";
-    file << "--------------------------------------\n";
+    bookingLedger.push_back({customerName, movies[movieIndex], date, times[movieIndex], seatNumber, type, paymentInfo, finalPrice, ticketID, "CONFIRMED"});
 }
 
 void bookSeats(int count, int m, const string& type, const string& customerName) {
@@ -395,55 +298,36 @@ void undoBooking() {
     bookingHistory.pop();
     seats[last.movieIndex][last.seat - 1] = false;
 
-    ifstream fin("bookings.txt");
-    if (!fin) {
-        cout << "Undo successful: Seat " << last.seat << " for " << movies[last.movieIndex] << " has been released.\n";
-        return;
-    }
-
-    vector<string> lines;
-    string line;
-    while (getline(fin, line)) lines.push_back(line);
-    fin.close();
-
-    string targetID = "Ticket ID  : " + to_string(last.ticketID);
-    bool patched = false;
-    int patchLine = -1;
-    for (int i = (int)lines.size() - 1; i >= 0; i--) {
-        if (lines[i] == targetID) {
-            patchLine = i;
+    for (auto it = bookingLedger.rbegin(); it != bookingLedger.rend(); ++it) {
+        if (it->ticketID == last.ticketID) {
+            it->status = "CANCELLED";
             break;
         }
     }
 
-    if (patchLine != -1) {
-        for (int i = patchLine; i < (int)lines.size(); i++) {
-            if (lines[i].find("Status     :") != string::npos) {
-                lines[i] = "Status     : CANCELLED";
-                patched = true;
-                break;
-            }
-            if (lines[i].find("--------------------------------------") != string::npos) break;
-        }
-    }
-
-    ofstream fout("bookings.txt");
-    for (const string& savedLine : lines) fout << savedLine << '\n';
-
     cout << "Undo successful: Seat " << last.seat << " for " << movies[last.movieIndex] << " has been released.\n";
-    if (patched) cout << "Ticket #" << last.ticketID << " marked as CANCELLED in the dashboard.\n";
 }
 
 void adminDashboard() {
-    ifstream file("bookings.txt");
-    if (!file || file.peek() == EOF) {
+    if (bookingLedger.empty()) {
         cout << "No booking records found.\n";
         return;
     }
-
+    
     cout << "\n============ ADMIN DASHBOARD ============\n";
-    string line;
-    while (getline(file, line)) cout << line << '\n';
+    for (const BookingRecord& record : bookingLedger) {
+        cout << "Ticket ID  : " << record.ticketID << '\n';
+        cout << "Customer   : " << record.customerName << '\n';
+        cout << "Movie      : " << record.movieName << '\n';
+        cout << "Date       : " << record.date << '\n';
+        cout << "Showtime   : " << record.showtime << '\n';
+        cout << "Seat       : " << record.seat << '\n';
+        cout << "Type       : " << record.type << '\n';
+        cout << "Payment    : " << record.paymentInfo << '\n';
+        cout << "Final Price: PHP " << record.finalPrice << '\n';
+        cout << "Status     : " << record.status << '\n';
+        cout << "--------------------------------------\n";
+    }
     cout << "=========================================\n";
 }
 
@@ -496,7 +380,6 @@ void addMovie() {
     showingUntil.push_back(untilDate);
     vipSeatCounts.push_back(vipCount);
     seats.push_back(vector<bool>(totalSeats, false));
-    saveMoviesToFile();
 
     cout << "Movie added successfully with " << vipCount << " VIP seats and " << regularCount << " regular seats.\n";
 }
@@ -577,8 +460,6 @@ void editMovie() {
         return;
     }
 
-    saveMoviesToFile();
-
     cout << "Movie updated successfully.\n";
 }
 
@@ -619,7 +500,6 @@ void deleteMovie() {
     showingUntil.erase(showingUntil.begin() + idx);
     vipSeatCounts.erase(vipSeatCounts.begin() + idx);
     seats.erase(seats.begin() + idx);
-    saveMoviesToFile();
 
     while (!bookingHistory.empty()) bookingHistory.pop();
     cout << "Movie deleted successfully. Booking undo history was cleared to keep indices valid.\n";
@@ -662,7 +542,6 @@ void addSeatsToMovie() {
         // Insert new VIP seats at the boundary between VIP and regular seats.
         seats[idx].insert(seats[idx].begin() + currentVipCount, addCount, false);
         vipSeatCounts[idx] = currentVipCount + addCount;
-        saveMoviesToFile();
         cout << "VIP seats added successfully. " << movies[idx] << " now has " << vipSeatCounts[idx] << " VIP seats.\n";
     } else if (choice == 2) {
         cout << "How many regular seats to add? ";
@@ -672,7 +551,6 @@ void addSeatsToMovie() {
             return;
         }
         seats[idx].insert(seats[idx].end(), addCount, false);
-        saveMoviesToFile();
         cout << "Regular seats added successfully. " << movies[idx] << " now has " << (seats[idx].size() - vipSeatCounts[idx]) << " regular seats.\n";
     } else {
         cout << "Invalid choice.\n";
@@ -1051,8 +929,6 @@ bool adminSession() {
 }
 
 int main() {
-    loadMoviesFromFile();
-    loadBookingsFromFile();
 
     cout << "============================================\n";
     cout << "     Welcome to CineMate Ticketing System  \n";
