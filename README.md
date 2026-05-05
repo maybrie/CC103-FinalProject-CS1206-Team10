@@ -19,10 +19,6 @@ Movie Ticket Booking System
 FinalProjectDSA/
 │── src/
 │   └── main.cpp
-│
-│── data/
-│   └── bookings.txt
-│
 │── README.md
 ```
 
