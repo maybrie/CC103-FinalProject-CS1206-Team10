@@ -263,10 +263,7 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
     if (tolower(static_cast<unsigned char>(confirm)) != 'y') {
         cout << "Booking cancelled.\n";
         return;
-    }
-
- // ---------------- SAVE ----------------
-    ticketID++; // 
+    }
 
     seats[m][seat - 1] = true;
     bookingHistory.push({m, seat, ticketID}); // 
@@ -313,17 +310,24 @@ void undoBooking() {
 
    ifstream fin("bookings.txt");
     if (!fin) {
-        cout << "Undo successful but could not update records.\n";
+        cout << "Undo successful: Seat " << last.seat << " for " << movies[last.movieIndex] << " has been released.\n";
         return;
     }
 
-    string line;
-    string targetID = "Ticket ID  : " + to_string(last.ticketID);
-    bool patched = false;
-
     vector<string> lines;
+    string line;
     while (getline(fin, line)) lines.push_back(line);
     fin.close();
+
+    string targetID = "Ticket ID  : " + to_string(last.ticketID);
+    bool patched = false;
+    int patchLine = -1;
+    for (int i = (int)lines.size() - 1; i >= 0; i--) {
+        if (lines[i] == targetID) {
+            patchLine = i;
+            break;
+        }
+    }
 
 
     int patchLine = -1;
@@ -344,13 +348,10 @@ void undoBooking() {
     }
 
     ofstream fout("bookings.txt");
-    for (const string& l : lines) fout << l << "\n";
-    fout.close();
+    for (const string& savedLine : lines) fout << savedLine << '\n';
 
-    cout << "Undo successful: Seat " << last.seat
-         << " for " << movies[last.movieIndex] << " has been released.\n";
-    if (patched)
-        cout << "Ticket #" << last.ticketID << " marked as CANCELLED in the dashboard.\n";
+   cout << "Undo successful: Seat " << last.seat << " for " << movies[last.movieIndex] << " has been released.\n";
+    if (patched)cout << "Ticket #" << last.ticketID << " marked as CANCELLED in the dashboard.\n";
 }
 
 // ---------------- ADMIN DASHBOARD ----------------
