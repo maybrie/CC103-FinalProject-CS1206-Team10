@@ -1,31 +1,34 @@
-#include <iostream>
+#include <iostream>
+#include <cctype>
 #include <deque>
 #include <stack>
 #include <vector>
 #include <string>
 #include <fstream>
+#include <unordered_set>
 #include <algorithm>
 #include <limits>
 using namespace std;  
-
-// --------------- STRUCT ---------------
+
 struct Booking {
     int movieIndex;
     int seat;
     int ticketID;
 };
 
-// ---------------- DATA STRUCTURES ----------------
-stack<Booking> bookingHistory;
 struct User {
     string name;
     bool vip;
     int seq;
 };
-
+
+stack<Booking> bookingHistory;
 deque<User> userQueue;
-User currentServedUser = {"", false, 0};  // Track currently served user
+unordered_set<string> usedNames;
+User currentServedUser = {"", false, 0};  
 int userSeq = 0;
+int ticketID = 1000;
+
 // ---------------- MOVIES ----------------
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
 vector<string> times  = {"10:00 AM - 12:40 PM", "1:00 PM - 2:30 PM",  "4:00 PM - 5:45 PM"};
@@ -34,8 +37,7 @@ vector<int> moviePrices = {500, 450, 400};
 // Seats per movie (3 movies, 10 seats each)
 vector<vector<bool>> seats(3, vector<bool>(10, false));
 
-//----------------- TICKET ID ----------------
-int ticketID = 1000;
+
 
 // ---------------- INPUT HELPERS ----------------
 int readInt() {
