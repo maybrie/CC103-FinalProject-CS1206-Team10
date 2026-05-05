@@ -198,8 +198,8 @@ void sortBooked(int m) {
     sort(booked.begin(), booked.end());
 
     cout << "Sorted booked seats for " << movies[m] << ": ";
-    for (int s : booked) cout << s << " ";
-    cout << "\n";
+    for (int seatNumber : booked) cout << seatNumber << ' ';
+    cout << '\n';
 }
 
 // ---------------- BOOK SEATS (RECURSIVE) ----------------
@@ -207,8 +207,7 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
     if (count == 0) return;
 
     viewSeatsByType(m, type);
-
-    int seat;
+
     cout << "\nEnter seat number to book: ";
     seat = readInt();
 
@@ -240,7 +239,7 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
     int basePrice = moviePrices[m];
     double finalPrice = basePrice;
     if (type == "VIP")
-        finalPrice = basePrice * 0.90; // 10% VIP discount
+        finalPrice = basePrice * 0.90; 
 
     cout << "\n========== BOOKING SUMMARY ==========\n";
     cout << " Customer    : " << customerName << "\n";
@@ -264,20 +263,14 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
     if (pay < 1 || pay > 2) {
         cout << "Invalid payment method. Booking cancelled.\n"
         return;
-    }
-    
-    cout << "Processing payment";
-    for (int i = 0; i < 3; i++) { cout << "."; cout.flush(); }
-    cout << "\n";
-    
-    if (pay == 1) cout << "Payment method: GCash\n";
-        else cout << "Payment method: Card\n"
+    }
     
     // ---------------- CONFIRM ---------------
     cout << "\nConfirm booking? (Y/N): ";
     char confirm = readChar();
     
-        if (confirm != 'Y' && confirm != 'y') {
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    if (tolower(static_cast<unsigned char>(confirm)) != 'y') {
         cout << "Booking cancelled.\n";
         return;
     }
