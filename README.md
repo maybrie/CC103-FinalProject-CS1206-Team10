@@ -39,7 +39,7 @@ FinalProjectDSA/
 - 🛂 Admin Dashboard
 
 ## 🖥️ Example Output
-![image alt](https://github.com/maybrie/CC103-FinalProject-CS1206-Team10/blob/e1bd7e95b93d3a9416877e6adccad613aac06ab4/Cinemate-output.png.png)
+![image alt](https://github.com/maybrie/CC103-FinalProject-CS1206-Team10/blob/935eef60d8bfd9bb75b583c2cac19b3783a4d231/output.png)
 
 ## 👥 Contributors
 
