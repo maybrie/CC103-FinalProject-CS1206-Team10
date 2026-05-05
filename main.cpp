@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <limits>
 using namespace std;  
-
+
 struct Booking {
     int movieIndex;
     int seat;
@@ -21,7 +21,8 @@ struct User {
     bool vip;
     int seq;
 };
-
+
+
 stack<Booking> bookingHistory;
 deque<User> userQueue;
 unordered_set<string> usedNames;
@@ -31,7 +32,8 @@ int ticketID = 1000;
 
 const string ADMIN_NAME = "Maria";
 const string ADMIN_PASSWORD = "Admin@123";
-
+
+
 vector<string> movies = {"Avengers", "Batman", "Spider-Man"};
 vector<string> times  = {"10:00 AM - 12:40 PM", "1:00 PM - 2:30 PM",  "4:00 PM - 5:45 PM"};
 vector<int> moviePrices = {500, 450, 400};
