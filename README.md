@@ -24,6 +24,10 @@ FinalProjectDSA/
 
 
 ## ✨ Features
+- 🛡 Admin Login
+- ⚙️ Main Menu (Admin/Customer) 
+- 👥 Customer Menu and Customer Mode
+- 📃 Admin Menu
 - 🎥 Movie Listing
 - ⏰ Showtime Selection
 - 💺 Seat Availability Checking
