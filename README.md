@@ -30,8 +30,10 @@ FinalProjectDSA/
 - 🎟️ Ticket Booking
 - ⏳ Add User To Queue
 - 🚀 Serve Next User
+- 📋 Add/Edit/Delete Movie
 - 🔄 Undo Last Booking
 - 🗓️ Sorted Booking Seats
+- ➕ Add Seats for VIP and Regular Seats
 - 🛂 Admin Dashboard
 
 ## 🖥️ Example Output
