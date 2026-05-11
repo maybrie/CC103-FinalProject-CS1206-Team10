@@ -270,7 +270,7 @@ void bookSeats(int count, int m, const string& type, const string& customerName)
 
     cout << "\nConfirm booking? (y/n): ";
     char confirm = readChar();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    clearInputLine();
     if (tolower(static_cast<unsigned char>(confirm)) != 'y') {
         cout << "Booking cancelled.\n";
         return;
@@ -488,7 +488,7 @@ void deleteMovie() {
 
     cout << "Delete '" << movies[idx] << "'? (y/n): ";
     char confirm = readChar();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    clearInputLine();
     if (tolower(static_cast<unsigned char>(confirm)) != 'y') {
         cout << "Delete cancelled.\n";
         return;
